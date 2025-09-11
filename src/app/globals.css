@@ -2,7 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-
 @layer components {
   .geist-mono-semibold {
     @apply font-mono font-semibold text-[20px] leading-[1] tracking-[0px] align-middle;
@@ -16,7 +15,6 @@
     @apply font-mono font-medium text-[18px] leading-[100%] tracking-[0px] align-middle;
   }
 }
-
 
 *,
 ::before,
@@ -53,8 +51,6 @@ body {
     text-wrap: balance;
   }
 } */
-
-
 
 @layer base {
   :root {
@@ -144,8 +140,6 @@ body {
     --sidebar-ring: oklch(0.439 0 0);
   }
 }
-
-
 
 @layer base {
   * {

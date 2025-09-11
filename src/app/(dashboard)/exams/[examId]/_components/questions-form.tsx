@@ -1,9 +1,7 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
-import { useForm, Controller } from "react-hook-form";
-import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { getQuestionsByExamId } from "@/lib/apis/exams.api";
 import { Exam } from "@/types/exams";
@@ -14,148 +12,163 @@ import { useCountdownStore } from "@/store/useCountdownStore";
 import { useCheckAnswers } from "../_hooks/useCheckAnswers";
 import { ButtonNavigator } from "./ButtonNavigator";
 import { AutoSubmit } from "./AutoSubmit";
+import { QuestionOptions } from "./question-options";
+import { AnswerWatcher } from "./answer-watcher";
+import toast from "react-hot-toast";
 
 type FormValues = {
-    answers: {
-        [questionId: string]: string;
-    };
+  answers: {
+    [questionId: string]: string;
+  };
 };
 
+/**
+ * QuestionsForm Component
+ * -----------------------
+ * This component renders the exam questions form:
+ * - Fetches questions by exam ID.
+ * - Manages navigation between questions (next/previous).
+ * - Handles countdown timer and auto-submit when time finishes.
+ * - Submits answers to API and stores the result in exam store.
+ */
 export default function QuestionsForm({ data }: { data?: Exam }) {
-    const checkAnswersMutation = useCheckAnswers();
-    const [questions, setQuestions] = useState<Question[]>([]);
-    const { control, handleSubmit, watch, formState: { isSubmitting }, } = useForm<FormValues>({
-        defaultValues: { answers: {} },
-    });
+  // Mutation hook to check answers (API call)
+  const checkAnswersMutation = useCheckAnswers();
 
-    const {
-        currentIndex,
-        nextQuestion,
-        prevQuestion,
-        setCurrentIndex,
-        settotalQuestions,
-    } = useExamStore();
+  // State to hold fetched questions
+  const [questions, setQuestions] = useState<Question[]>([]);
 
-    const { resetCountdown, timeLeft, isFinished } = useCountdownStore();
-    const formRef = useRef<HTMLFormElement | null>(null);
+  // React Hook Form setup
+  const {
+    control,
+    handleSubmit,
+    formState: { isSubmitting },
+  } = useForm<FormValues>({
+    defaultValues: { answers: {} },
+  });
 
-    useEffect(() => {
-        if (!data?._id) return;
+  // Exam store: manages current index, navigation, and total questions
+  const {
+    currentIndex,
+    nextQuestion,
+    prevQuestion,
+    setCurrentIndex,
+    settotalQuestions,
+  } = useExamStore();
 
-        getQuestionsByExamId(data._id)
-            .then((res) => {
-                setQuestions(res);
-                setCurrentIndex(0);
-                settotalQuestions(res.length);
-            })
-            .catch(console.error);
-    }, [data?._id, setCurrentIndex, settotalQuestions]);
+  // Countdown store: reset and check if finished
+  const resetCountdown = useCountdownStore.getState().resetCountdown;
+  const isFinished = useCountdownStore((state) => state.isFinished);
 
-    useEffect(() => {
-        return () => {
-            resetCountdown();
-        };
-    }, [resetCountdown]);
+  // Reference for the form (used by AutoSubmit)
+  const formRef = useRef<HTMLFormElement | null>(null);
 
-    if (!data?._id) return <p>No exam selected</p>;
-    if (!questions.length) return <p>Loading questions...</p>;
+  /**
+   * Fetch questions when exam ID changes
+   */
+  useEffect(() => {
+    if (!data?._id) return;
 
-    const currentQuestion = questions[currentIndex];
-    const selectedAnswer = watch(`answers.${currentQuestion._id}`);
+    getQuestionsByExamId(data._id)
+      .then((res) => {
+        setQuestions(res);
+        setCurrentIndex(0);
+        settotalQuestions(res.length);
+      })
+      .catch((err) => toast.error(err.message));
+  }, [data?._id, setCurrentIndex, settotalQuestions]);
 
-    const onSubmit = (values: FormValues) => {
-        const formattedAnswers = Object.entries(values.answers).map(
-            ([questionId, correct]) => ({
-                questionId,
-                correct,
-            })
-        );
-
-        const payload = {
-            answers: formattedAnswers,
-            time: timeLeft,
-        };
-
-        const setResult = useExamStore.getState().setResult;
-
-        checkAnswersMutation.mutate(payload, {
-            onSuccess: (data) => {
-                setResult(data);
-            },
-            onError: (err) => {
-                console.error("Check answers error:", err);
-            },
-        });
+  /**
+   * Reset countdown when component unmounts
+   */
+  useEffect(() => {
+    return () => {
+      resetCountdown();
     };
+  }, [resetCountdown]);
 
-    const handleNext = () => {
-        if (!selectedAnswer) return;
-        nextQuestion();
-    };
+  if (!data?._id) return <p>No exam selected</p>;
+  if (!questions.length) return <p>Loading questions...</p>;
 
+  const currentQuestion = questions[currentIndex];
 
-    return (
-        <form ref={formRef} onSubmit={handleSubmit(onSubmit)} className="p-6">
-            {/* Question */}
-            <h2 className="geist-mono-semibold text-primary mb-4">
-                {currentQuestion.question}
-            </h2>
-
-            {/* Options */}
-            <Controller
-                key={currentQuestion._id}
-                control={control}
-                name={`answers.${currentQuestion._id}`}
-                render={({ field }) => (
-                    <RadioGroup
-                        value={field.value || ""}
-                        onValueChange={field.onChange}
-                        className="space-y-3"
-                    >
-                        {currentQuestion.answers.map((option) => (
-                            <div
-                                key={option.key}
-                                className="flex items-center space-x-2 p-4 geist-mono-regular h-[50px] bg-gray-50 hover:bg-gray-100 rounded-md"
-                            >
-                                <RadioGroupItem
-                                    value={option.key}
-                                    id={`${currentQuestion._id}-${option.key}`}
-                                />
-                                <Label htmlFor={`${currentQuestion._id}-${option.key}`}>
-                                    {option.answer}
-                                </Label>
-                            </div>
-                        ))}
-                    </RadioGroup>
-                )}
-            />
-
-            {/* Navigation */}
-            <div className="mt-6 flex justify-between gap-4">
-                {/* Previous */}
-                <Button
-                    className="h-12 font-medium text-[14px] flex-1"
-                    type="button"
-                    variant="outline"
-                    disabled={currentIndex === 0}
-                    onClick={prevQuestion}
-                >
-                    Previous
-                </Button>
-
-                {/* Timer */}
-                <CountdownTimer totalMinutes={data.duration} />
-
-                {/* Next / Submit */}
-                <ButtonNavigator
-                    hasAnswer={!!selectedAnswer}
-                    isLast={currentIndex === questions.length - 1}
-                    isLoading={checkAnswersMutation.isPending || isSubmitting}
-                    onNext={handleNext}
-                />
-            </div>
-
-            <AutoSubmit formRef={formRef} isFinished={isFinished} />
-        </form>
+  /**
+   * Handle form submission (send answers + time left)
+   */
+  const onSubmit = (values: FormValues) => {
+    // Format answers into API-compatible shape
+    const formattedAnswers = Object.entries(values.answers).map(
+      ([questionId, correct]) => ({
+        questionId,
+        correct,
+      })
     );
+
+    // Get remaining time
+    const timeLeft = useCountdownStore.getState().timeLeft;
+
+    const payload = {
+      answers: formattedAnswers,
+      time: timeLeft,
+    };
+
+    const setResult = useExamStore.getState().setResult;
+
+    // API call to check answers
+    checkAnswersMutation.mutate(payload, {
+      onSuccess: (data) => {
+        setResult(data);
+      },
+      onError: (err) => {
+        toast.error(err.message);
+      },
+    });
+  };
+
+  return (
+    <form ref={formRef} onSubmit={handleSubmit(onSubmit)} className="p-6">
+      {/* Render current question text */}
+      <h2 className="geist-mono-semibold text-primary mb-4">
+        {currentQuestion.question}
+      </h2>
+
+      {/* Render current question options */}
+      <QuestionOptions control={control} question={currentQuestion} />
+
+      {/* Navigation buttons + Timer */}
+      <div className="mt-6 flex justify-between gap-4">
+        {/* Previous Question Button */}
+        <Button
+          className="h-12 font-medium text-[14px] flex-1"
+          type="button"
+          variant="outline"
+          disabled={currentIndex === 0}
+          onClick={prevQuestion}
+        >
+          Previous
+        </Button>
+
+        {/* Countdown Timer */}
+        <CountdownTimer totalMinutes={data.duration} />
+
+        {/* Next / Submit Button controlled by AnswerWatcher */}
+        <AnswerWatcher control={control} questionId={currentQuestion._id}>
+          {(selectedAnswer) => (
+            <ButtonNavigator
+              hasAnswer={!!selectedAnswer}
+              isLast={currentIndex === questions.length - 1}
+              isLoading={checkAnswersMutation.isPending || isSubmitting}
+              onNext={() => {
+                if (!selectedAnswer) return;
+                nextQuestion();
+              }}
+            />
+          )}
+        </AnswerWatcher>
+      </div>
+
+      {/* Auto Submit when time finishes */}
+      <AutoSubmit formRef={formRef} isFinished={isFinished} />
+    </form>
+  );
 }

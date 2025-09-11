@@ -1,14 +1,4 @@
-/**
- * Error Component
- * ---------------
- * A client component that serves as the error boundary UI:
- * - Displays an error message when something goes wrong.
- * - Provides a "Try Again" button that calls the `reset()` function
- *   from Next.js to reattempt rendering.
- * - Provides a "Go to Login" button that navigates users to the login page.
- */
-
-"use client";
+"use client"; // Marks this component as a client-side component in Next.js
 
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
@@ -17,29 +7,29 @@ export default function Error({
   error,
   reset,
 }: {
-  error: Error & { digest?: string };
-  reset: () => void;
+  error: Error & { digest?: string }; // `error` object includes details about the error
+  reset: () => void; // `reset` function allows retrying the rendering
 }) {
-  const router = useRouter();
+  const router = useRouter(); // Next.js navigation hook for client-side routing
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen space-y-4">
-      {/* Error headline */}
+      {/* Error title */}
       <h2 className="text-2xl font-semibold text-red-600">
         Something went wrong!
       </h2>
 
-      {/* Display the actual error message */}
+      {/* Show the actual error message */}
       <p className="text-gray-600">{error.message}</p>
 
       {/* Action buttons */}
       <div className="flex space-x-2">
-        {/* Retry button - triggers Next.js `reset()` */}
+        {/* Retry rendering the component/route */}
         <Button variant="outline" onClick={() => reset()}>
           Try Again
         </Button>
 
-        {/* Navigate user to login page */}
+        {/* Navigate user back to the login page */}
         <Button onClick={() => router.push("/login")}>Go to Login</Button>
       </div>
     </div>

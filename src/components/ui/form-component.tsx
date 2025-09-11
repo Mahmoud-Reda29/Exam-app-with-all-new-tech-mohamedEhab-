@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { useRouter } from "next/navigation";
-import { XCircle } from "lucide-react";
+import { XCircle, Eye, EyeOff } from "lucide-react";
 import { UserInput, userSchema } from "@/lib/schemes/auth.schema";
 import { useEditProfile } from "@/app/(dashboard)/(account-settings)/profile/_hooks/use-edit-profile";
 import toast from "react-hot-toast";
@@ -23,9 +23,16 @@ import { signOut } from "next-auth/react";
 import { DeleteAccountButton } from "@/app/(dashboard)/(account-settings)/profile/_component/DeleteAccountButton";
 import { useRegister } from "@/app/(auth)/register/_hooks/use-register";
 import { PhoneInput } from "./phone-input";
+import { useState } from "react";
 
 export function FormComponent({ isProfile, isEdit }: { isProfile?: boolean; isEdit?: boolean }) {
+    // States to toggle password visibility
+    const [showPassword, setShowPassword] = useState(false);
+    const [showRePassword, setShowRePassword] = useState(false);
+
     const router = useRouter();
+
+    // React Hook Form setup with Zod schema validation
     const form = useForm<UserInput>({
         resolver: zodResolver(userSchema),
         defaultValues: {
@@ -39,13 +46,15 @@ export function FormComponent({ isProfile, isEdit }: { isProfile?: boolean; isEd
         }
     });
 
+    // Mutation hook to delete account
     const deleteMutation = useDeleteMe();
 
+    // Function to handle account deletion
     const handleDelete = () => {
         deleteMutation.mutate(undefined, {
             onSuccess: async () => {
                 toast.success("Account deleted successfully!");
-                await signOut({ callbackUrl: "/login" });
+                await signOut({ callbackUrl: "/login" }); // redirect to login after deletion
             },
             onError: (err: any) => {
                 toast.error(err.message || "Failed to delete account.");
@@ -53,21 +62,24 @@ export function FormComponent({ isProfile, isEdit }: { isProfile?: boolean; isEd
         });
     };
 
-
-
+    // Mutation hooks for registration and profile editing
     const registerMutation = useRegister();
     const editProfileMutation = useEditProfile();
 
+    // Form submission handler
     const onSubmit = (data: UserInput) => {
+        // Normalize phone number
         let phone = data.phone || "";
         phone = phone.replace(/^(\+2|002)/, "");
         const payload = { ...data, phone };
 
+        // Remove password fields if not provided
         if (!data.password) {
             delete payload.password;
             delete payload.rePassword;
         }
 
+        // Determine whether to edit profile or register a new user
         if (isProfile && isEdit) {
             editProfileMutation.mutate(payload, {
                 onSuccess: () => {
@@ -95,24 +107,20 @@ export function FormComponent({ isProfile, isEdit }: { isProfile?: boolean; isEd
         }
     };
 
-
-
     return (
         <div className="flex flex-col justify-center gap-10 font-sans">
+            {/* Title only for registration form */}
             {!isProfile && <h1 className="font-sans font-bold text-[30px] leading-[1] pb-6">
                 Create Account
             </h1>}
-
 
             <Form {...form}>
                 <form
                     onSubmit={form.handleSubmit(onSubmit)}
                     className={`space-y-4 ${!isProfile && "w-[452px]"} `}
                 >
-
                     <div className="grid grid-cols-2 gap-4">
-
-                        {/* First Name */}
+                        {/* First Name field */}
                         <FormField
                             control={form.control}
                             name="firstName"
@@ -135,7 +143,7 @@ export function FormComponent({ isProfile, isEdit }: { isProfile?: boolean; isEd
                             )}
                         />
 
-                        {/* Last Name */}
+                        {/* Last Name field */}
                         <FormField
                             control={form.control}
                             name="lastName"
@@ -159,7 +167,7 @@ export function FormComponent({ isProfile, isEdit }: { isProfile?: boolean; isEd
                         />
                     </div>
 
-                    {/* Username */}
+                    {/* Username field */}
                     <FormField
                         control={form.control}
                         name="username"
@@ -182,7 +190,7 @@ export function FormComponent({ isProfile, isEdit }: { isProfile?: boolean; isEd
                         )}
                     />
 
-                    {/* Email */}
+                    {/* Email field */}
                     <FormField
                         control={form.control}
                         name="email"
@@ -205,7 +213,7 @@ export function FormComponent({ isProfile, isEdit }: { isProfile?: boolean; isEd
                         )}
                     />
 
-                    {/* Phone Number */}
+                    {/* Phone number field */}
                     <FormField
                         control={form.control}
                         name="phone"
@@ -230,25 +238,37 @@ export function FormComponent({ isProfile, isEdit }: { isProfile?: boolean; isEd
                         )}
                     />
 
+                    {/* Password fields only for registration */}
                     {!isProfile && <>
                         {/* Password */}
-                        < FormField
+                        <FormField
                             control={form.control}
                             name="password"
                             render={({ field }) => (
                                 <FormItem>
                                     <FormLabel>Password</FormLabel>
                                     <FormControl>
-                                        <Input
-                                            type="password"
-                                            placeholder="Password"
-                                            {...field}
-                                            className={
-                                                form.formState.errors.password
-                                                    ? "border-red-500 focus:border-red-500 focus:ring-red-500"
-                                                    : ""
-                                            }
-                                        />
+                                        <div className="relative">
+                                            {/* Password input with toggle visibility */}
+                                            <Input
+                                                type={showPassword ? "text" : "password"}
+                                                placeholder="Password"
+                                                {...field}
+                                                className={
+                                                    form.formState.errors.password
+                                                        ? "border-red-500 focus:border-red-500 focus:ring-red-500 pr-10"
+                                                        : "pr-10"
+                                                }
+                                            />
+                                            {/* Eye icon button */}
+                                            <button
+                                                type="button"
+                                                onClick={() => setShowPassword(!showPassword)}
+                                                className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                                            >
+                                                {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                                            </button>
+                                        </div>
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
@@ -263,16 +283,26 @@ export function FormComponent({ isProfile, isEdit }: { isProfile?: boolean; isEd
                                 <FormItem>
                                     <FormLabel>Confirm Password</FormLabel>
                                     <FormControl>
-                                        <Input
-                                            type="password"
-                                            placeholder="Confirm Password"
-                                            {...field}
-                                            className={
-                                                form.formState.errors.rePassword
-                                                    ? "border-red-500 focus:border-red-500 focus:ring-red-500"
-                                                    : ""
-                                            }
-                                        />
+                                        <div className="relative">
+                                            {/* Confirm password input with toggle visibility */}
+                                            <Input
+                                                type={showRePassword ? "text" : "password"}
+                                                placeholder="Confirm Password"
+                                                {...field}
+                                                className={
+                                                    form.formState.errors.rePassword
+                                                        ? "border-red-500 focus:border-red-500 focus:ring-red-500 pr-10"
+                                                        : "pr-10"
+                                                }
+                                            />
+                                            <button
+                                                type="button"
+                                                onClick={() => setShowRePassword(!showRePassword)}
+                                                className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                                            >
+                                                {showRePassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                                            </button>
+                                        </div>
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
@@ -282,7 +312,7 @@ export function FormComponent({ isProfile, isEdit }: { isProfile?: boolean; isEd
                     }
 
                     <div className={`flex flex-col gap-9 ${isProfile ? "pt-2" : "pt-6"} `}>
-                        {/* Error Alert */}
+                        {/* Global error alert */}
                         {(registerMutation.isError || editProfileMutation.isError) && (
                             <div className="relative w-full bg-red-50 border border-red-300 text-red-600 rounded-md p-3 h-fit">
                                 <XCircle className="h-5 w-5 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white text-red-600" />
@@ -299,6 +329,7 @@ export function FormComponent({ isProfile, isEdit }: { isProfile?: boolean; isEd
                             </div>
                         )}
 
+                        {/* Submit button for registration */}
                         {!isProfile && <Button
                             className="w-full h-12 bg-primary rounded-none"
                             type="submit"
@@ -307,6 +338,7 @@ export function FormComponent({ isProfile, isEdit }: { isProfile?: boolean; isEd
                             {registerMutation.isPending ? "Loading..." : "Create Account"}
                         </Button>}
 
+                        {/* Buttons for profile editing */}
                         {isProfile && (
                             <div className="flex gap-4">
                                 <DeleteAccountButton
@@ -324,6 +356,7 @@ export function FormComponent({ isProfile, isEdit }: { isProfile?: boolean; isEd
                             </div>
                         )}
 
+                        {/* Link to login page for users who already have account */}
                         {!isProfile && <div className="pt-4 text-center">
                             <span className="font-mono font-medium text-[14px] text-muted-foreground">
                                 Already have an account?{" "}

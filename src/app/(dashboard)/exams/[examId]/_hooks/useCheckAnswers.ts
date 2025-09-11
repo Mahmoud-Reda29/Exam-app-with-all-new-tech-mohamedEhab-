@@ -1,13 +1,20 @@
-// src/hooks/useCheckAnswers.ts
+/**
+ * useCheckAnswers Hook
+ * ---------------------
+ * A custom hook to handle checking exam answers with React Query:
+ * - Wraps the `checkAnswersAction` server action in a mutation.
+ * - Accepts an `AnswerPayload` and sends it to the API.
+ * - Provides mutation states (loading, error, success) for UI handling.
+ */
+
 import { AnswerPayload } from "@/types/exams";
 import { useMutation } from "@tanstack/react-query";
 import { checkAnswersAction } from "../_action/exam";
 
-
 export const useCheckAnswers = () => {
-    return useMutation({
-        mutationFn: async (data: AnswerPayload) => {
-            return await checkAnswersAction(data);
-        },
-    });
+  return useMutation({
+    mutationFn: async (data: AnswerPayload) => {
+      return await checkAnswersAction(data);
+    },
+  });
 };
