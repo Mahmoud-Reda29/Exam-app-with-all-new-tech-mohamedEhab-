@@ -39,11 +39,11 @@ export function FormComponent({ isProfile, isEdit }: { isProfile?: boolean; isEd
     const form = useForm<UserInput>({
         resolver: zodResolver(userSchema),
         defaultValues: {
-            username: user?.username || "",
-            firstName: user?.firstName || "",
-            lastName: user?.lastName || "",
-            email: user?.email || "",
-            phone: user?.phone || "",
+            username: "",
+            firstName: "",
+            lastName: "",
+            email: "",
+            phone: "",
             password: undefined,
             rePassword: undefined,
         }
