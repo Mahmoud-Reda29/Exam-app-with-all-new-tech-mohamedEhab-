@@ -1,16 +1,13 @@
 "use client";
 
 import { useMutation } from "@tanstack/react-query";
-import {
-  forgotPassword,
-  verifyResetCode,
-  resetPassword,
-} from "@/app/(auth)/_actions/auth";
+
 import {
   ForgotPasswordInput,
   ResetPasswordInput,
   VerifyCodeInput,
 } from "@/lib/schemes/auth.schema";
+import { forgotPassword, resetPassword, verifyResetCode } from "../../_actions/auth.action";
 
 /**
  * Hook: useForgotPassword

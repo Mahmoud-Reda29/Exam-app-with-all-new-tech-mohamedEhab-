@@ -2,7 +2,8 @@
 
 import { useMutation } from "@tanstack/react-query";
 import { UserInput } from "@/lib/schemes/auth.schema";
-import { registerAction } from "../../_actions/auth";
+import { registerAction } from "../../_actions/auth.action";
+
 
 // Custom hook to handle user registration logic
 export const useRegister = () => {

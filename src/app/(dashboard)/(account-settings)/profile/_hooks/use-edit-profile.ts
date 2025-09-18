@@ -1,6 +1,6 @@
 import { useMutation } from "@tanstack/react-query";
 import { UserInput } from "@/lib/schemes/auth.schema";
-import { editProfile } from "../_actions/profile";
+import { editProfile } from "../_actions/profile.action";
 
 /**
  * useEditProfile Hook

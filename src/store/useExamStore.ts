@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { ResultData } from "@/types/result";
+import { ResultData } from "@/lib/types/result";
 
 interface ExamState {
     currentIndex: number;

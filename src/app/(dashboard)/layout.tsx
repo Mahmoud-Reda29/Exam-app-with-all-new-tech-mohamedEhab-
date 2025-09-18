@@ -11,7 +11,7 @@
 import { SidebarProvider } from "@/components/ui/sidebar";
 import React from "react";
 import { AppSidebar } from "./_components/sidebar";
-import { Providers } from "../providers";
+import { Providers } from "../../components/providers/providers";
 import Breadcrumbs from "./_components/breadcrumbs";
 import Titlebar from "./_components/titlebar";
 import BackButton from "./_components/back-button";

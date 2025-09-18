@@ -15,7 +15,7 @@ export async function changePassword(data: ChangePasswordInput) {
   const token = await getAccessToken();
 
   const res = await fetch(
-    `${process.env.NEXT_PUBLIC_API_BASE}/auth/changePassword`,
+    `${process.env.API}/auth/changePassword`,
     {
       method: "PATCH",
       headers: { "Content-Type": "application/json", token: token || "" },

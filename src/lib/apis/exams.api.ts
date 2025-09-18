@@ -1,6 +1,6 @@
 import { getAccessToken } from "@/lib/utils/auth.util";
-import { Exam, ExamsResponse } from "@/types/exams";
-import { Question, QuestionsResponse } from "@/types/question";
+import { Exam, ExamsResponse } from "@/lib/types/exams";
+import { Question, QuestionsResponse } from "@/lib/types/question";
 
 export async function getExams(): Promise<Exam[]> {
     const token = await getAccessToken();

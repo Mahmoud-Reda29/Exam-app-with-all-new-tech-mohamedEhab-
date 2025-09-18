@@ -36,6 +36,7 @@ import {
 import CountdownTimer from "../../../../components/shared/countdownTimer";
 import { useCountdownStore } from "@/store/useCountdownStore";
 import { useRouter } from "next/navigation";
+import { MoveLeft, MoveRight } from "lucide-react";
 
 /**
  * ForgotPasswordForm Component
@@ -51,11 +52,15 @@ import { useRouter } from "next/navigation";
  * - Countdown timer for resend functionality.
  */
 export function ForgotPasswordForm() {
-  const [step, setStep] = useState<1 | 2 | 3>(1); // Track form step
-  const startCountdown = useCountdownStore((s) => s.startCountdown);
+  // States
+  const [step, setStep] = useState<1 | 2 | 3>(1);
+  const [email, setEmail] = useState("");
+
+  // Navigation
   const router = useRouter();
 
-  // Mutations for each step
+  // Hooks
+  const startCountdown = useCountdownStore((s) => s.startCountdown);
   const forgotPasswordMutation = useForgotPassword();
   const verifyResetCodeMutation = useVerifyResetCode();
   const resetPasswordMutation = useResetPassword();
@@ -73,7 +78,7 @@ export function ForgotPasswordForm() {
 
   const resetForm = useForm<ResetPasswordInput>({
     resolver: zodResolver(resetPasswordSchema),
-    defaultValues: { email: "", newPassword: "" },
+    defaultValues: { email: email, newPassword: "", confirmNewPassword: "" },
   });
 
   // Step 1: Submit email → trigger forgot password API
@@ -82,6 +87,7 @@ export function ForgotPasswordForm() {
       onSuccess: () => {
         startCountdown(60); // Start 60s countdown
         setStep(2); // Move to next step
+        setEmail(data.email);
       },
     });
   };
@@ -95,11 +101,12 @@ export function ForgotPasswordForm() {
     });
   };
 
-  // Step 3: Submit new password → reset password API
+  // Step 3: Submit new password
   const handleResetSubmit = (data: ResetPasswordInput) => {
+    data.email = email;
     resetPasswordMutation.mutate(data, {
       onSuccess: () => {
-        router.push("/login"); // Redirect on success
+        router.push("/login");
       },
     });
   };
@@ -165,12 +172,7 @@ export function ForgotPasswordForm() {
                 ) : (
                   <>
                     <span>Continue</span>
-                    <Image
-                      src="/images/move-right.png"
-                      alt="Continue Icon"
-                      width={18}
-                      height={18}
-                    />
+                    <MoveRight size={18} />
                   </>
                 )}
               </Button>
@@ -197,31 +199,25 @@ export function ForgotPasswordForm() {
         <Form {...codeForm}>
           <div className="flex flex-col gap-10">
             {/* Back Button */}
-            <span
-              onClick={() => setStep(1)}
-              className="border w-fit p-2 cursor-pointer"
-            >
-              <Image
-                src="/images/move-left.png"
-                alt="Previous Icon"
-                width={24}
-                height={24}
-              />
+            <span onClick={() => setStep(1)} className="border w-fit p-2 cursor-pointer">
+              <MoveLeft size={24} />
             </span>
 
             {/* Header */}
             <div className="flex flex-col gap-3">
-              <h1 className="font-bold text-[30px] leading-[1] ">
-                Forgot Password
-              </h1>
+              <h1 className="font-bold text-[30px] leading-[1]">Forgot Password</h1>
               <h2 className="font-mono text-[16px] text-[#6B7280]">
                 Please enter the 6-digits code we have sent to:
               </h2>
               <p className="font-mono text-[16px] text-gray-600">
-                user@example.com.{" "}
-                <span className="underline text-primary cursor-pointer">
+                {email}{" "}
+                <Button
+                  onClick={() => setStep(1)}
+                  variant={"outline"}
+                  className="underline border-none p-0 hover:bg-transparent text-primary cursor-pointer"
+                >
                   Edit
-                </span>
+                </Button>
               </p>
             </div>
 
@@ -268,7 +264,7 @@ export function ForgotPasswordForm() {
               />
 
               {/* Countdown Timer */}
-              <CountdownTimer />
+              <CountdownTimer email={email} />
 
               {/* Submit Button */}
               <Button
@@ -316,7 +312,7 @@ export function ForgotPasswordForm() {
 
           {/* Header */}
           <div className="flex flex-col gap-3">
-            <h1 className="font-bold text-[30px] leading-[1] ">
+            <h1 className="font-bold text-[30px] leading-[1]">
               Create a New Password
             </h1>
             <h2 className="font-mono text-[16px] text-[#6B7280]">
@@ -329,21 +325,6 @@ export function ForgotPasswordForm() {
             onSubmit={resetForm.handleSubmit(handleResetSubmit)}
             className="flex flex-col gap-4 w-[452px] font-mono"
           >
-            {/* Email Field */}
-            <FormField
-              control={resetForm.control}
-              name="email"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Email</FormLabel>
-                  <FormControl>
-                    <Input placeholder="user@example.com" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
             {/* New Password Field */}
             <FormField
               control={resetForm.control}
@@ -352,24 +333,36 @@ export function ForgotPasswordForm() {
                 <FormItem>
                   <FormLabel>New Password</FormLabel>
                   <FormControl>
-                    <Input
-                      type="password"
-                      placeholder="New password"
-                      {...field}
-                    />
+                    <Input type="password" placeholder="New password" {...field} />
                   </FormControl>
                   <FormMessage />
-                  {/* Error Handling */}
-                  {resetPasswordMutation.isError && (
-                    <p className="text-sm text-red-500 mt-1">
-                      {resetPasswordMutation.error instanceof Error
-                        ? resetPasswordMutation.error.message
-                        : "Something went wrong"}
-                    </p>
-                  )}
                 </FormItem>
               )}
             />
+
+            {/* Confirm Password Field */}
+            <FormField
+              control={resetForm.control}
+              name="confirmNewPassword"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Confirm Password</FormLabel>
+                  <FormControl>
+                    <Input type="password" placeholder="Confirm new password" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* Error Handling */}
+            {resetPasswordMutation.isError && (
+              <p className="text-sm text-red-500 mt-1">
+                {resetPasswordMutation.error instanceof Error
+                  ? resetPasswordMutation.error.message
+                  : "Something went wrong"}
+              </p>
+            )}
 
             {/* Submit Button */}
             <Button

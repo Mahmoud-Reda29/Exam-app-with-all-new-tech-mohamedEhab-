@@ -64,7 +64,7 @@ export function AppSidebar({ isfixed }: { isfixed?: boolean }) {
           <SidebarHeader>
             <div className="flex items-center justify-between">
               <Image
-                src="/images/logo.png"
+                src="/images/FinalLogo1.png"
                 alt="Logo"
                 width={192}
                 height={37}
@@ -109,7 +109,7 @@ export function AppSidebar({ isfixed }: { isfixed?: boolean }) {
                   return (
                     <SidebarMenuItem
                       key={item.title}
-                      className={`p-4 border text-primary geist-mono-regular 
+                      className={`p-4 border text-primary geist-mono-regular
                       ${
                         isActive
                           ? "border-blue-500 bg-[#DBEAFE]"
@@ -146,7 +146,6 @@ export function AppSidebar({ isfixed }: { isfixed?: boolean }) {
                       <div className="relative w-[54px] h-[54px] overflow-hidden border-2 border-primary shrink-0">
                         <Image
                           src={
-                            session?.user?.image ||
                             "/images/cb9358d489b7d9a2fbcfd109b058718b5287b696.jpg"
                           }
                           alt="User Avatar"
@@ -159,7 +158,7 @@ export function AppSidebar({ isfixed }: { isfixed?: boolean }) {
                       {/* User info */}
                       <div className="flex flex-col text-left ml-3 overflow-hidden">
                         <span className="font-semibold truncate">
-                          {session?.user?.name || "Guest"}
+                          {session?.user?.firstName || "Guest"}
                         </span>
                         <p className="text-sm text-muted-foreground truncate">
                           {session?.user?.email || "No email"}

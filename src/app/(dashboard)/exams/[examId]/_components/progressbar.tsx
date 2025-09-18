@@ -1,7 +1,7 @@
 "use client";
 import { Progress } from "@/components/ui/progress";
 import { useExamStore } from "@/store/useExamStore";
-import { Exam } from "@/types/exams";
+import { Exam } from "@/lib/types/exams";
 import React, { useEffect } from "react";
 
 export default function Progressbar({ data }: { data?: Exam }) {

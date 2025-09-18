@@ -10,6 +10,7 @@ export default function Error({
   error: Error & { digest?: string }; // `error` object includes details about the error
   reset: () => void; // `reset` function allows retrying the rendering
 }) {
+  // Navigation
   const router = useRouter(); // Next.js navigation hook for client-side routing
 
   return (

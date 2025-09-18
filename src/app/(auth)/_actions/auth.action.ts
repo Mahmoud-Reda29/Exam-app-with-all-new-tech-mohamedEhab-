@@ -15,7 +15,7 @@ import {
  */
 export async function forgotPassword(email: ForgotPasswordInput["email"]) {
   const res = await fetch(
-    `${process.env.NEXT_PUBLIC_API_BASE}/auth/forgotPassword`,
+    `${process.env.API}/auth/forgotPassword`,
     {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -38,7 +38,7 @@ export async function forgotPassword(email: ForgotPasswordInput["email"]) {
  */
 export async function verifyResetCode(resetCode: VerifyCodeInput["resetCode"]) {
   const res = await fetch(
-    `${process.env.NEXT_PUBLIC_API_BASE}/auth/verifyResetCode`,
+    `${process.env.API}/auth/verifyResetCode`,
     {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -61,7 +61,7 @@ export async function verifyResetCode(resetCode: VerifyCodeInput["resetCode"]) {
  */
 export async function resetPassword(data: ResetPasswordInput) {
   const res = await fetch(
-    `${process.env.NEXT_PUBLIC_API_BASE}/auth/resetPassword`,
+    `${process.env.API}/auth/resetPassword`,
     {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
@@ -87,7 +87,7 @@ export async function resetPassword(data: ResetPasswordInput) {
  */
 export async function registerAction(data: UserInput) {
   try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}/auth/signup`, {
+    const res = await fetch(`${process.env.API}/auth/signup`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

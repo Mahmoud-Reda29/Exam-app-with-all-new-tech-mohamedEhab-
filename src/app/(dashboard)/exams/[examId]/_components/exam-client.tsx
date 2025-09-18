@@ -1,11 +1,11 @@
 "use client";
 
-import { Exam } from "@/types/exams";
+import { Exam } from "@/lib/types/exams";
 import Progressbar from "./progressbar";
 import QuestionsForm from "./questions-form";
 import ExamResult from "./result-component";
 import { useExamStore } from "@/store/useExamStore";
-import { ResultData } from "@/types/result";
+import { ResultData } from "@/lib/types/result";
 import { Button } from "@/components/ui/button";
 import { FolderSearch, RotateCcw } from "lucide-react";
 

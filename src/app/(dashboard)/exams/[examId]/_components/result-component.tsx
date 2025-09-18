@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { ResultData, Question } from "@/types/result";
+import { ResultData, Question } from "@/lib/types/result";
 import { CircularProgressbar, buildStyles } from "react-circular-progressbar";
 import "react-circular-progressbar/dist/styles.css";
 import { useExamStore } from "@/store/useExamStore";

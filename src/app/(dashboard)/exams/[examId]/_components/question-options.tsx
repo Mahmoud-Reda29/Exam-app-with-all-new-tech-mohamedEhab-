@@ -1,7 +1,7 @@
 "use client";
 
 import { Controller } from "react-hook-form";
-import { Question } from "@/types/question";
+import { Question } from "@/lib/types/question";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 

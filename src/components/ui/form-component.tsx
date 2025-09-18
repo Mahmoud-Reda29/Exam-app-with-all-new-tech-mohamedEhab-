@@ -19,11 +19,11 @@ import { UserInput, userSchema } from "@/lib/schemes/auth.schema";
 import { useEditProfile } from "@/app/(dashboard)/(account-settings)/profile/_hooks/use-edit-profile";
 import toast from "react-hot-toast";
 import { useDeleteMe } from "@/app/(dashboard)/(account-settings)/profile/_hooks/use-delete-acount";
-import { signOut } from "next-auth/react";
+import { signOut, useSession } from "next-auth/react";
 import { DeleteAccountButton } from "@/app/(dashboard)/(account-settings)/profile/_component/DeleteAccountButton";
 import { useRegister } from "@/app/(auth)/register/_hooks/use-register";
 import { PhoneInput } from "./phone-input";
-import { useState } from "react";
+import { use, useEffect, useState } from "react";
 
 export function FormComponent({ isProfile, isEdit }: { isProfile?: boolean; isEdit?: boolean }) {
     // States to toggle password visibility
@@ -32,19 +32,35 @@ export function FormComponent({ isProfile, isEdit }: { isProfile?: boolean; isEd
 
     const router = useRouter();
 
+    const session = useSession();
+    const user = session.data?.user;
+
     // React Hook Form setup with Zod schema validation
     const form = useForm<UserInput>({
         resolver: zodResolver(userSchema),
         defaultValues: {
-            username: "",
-            firstName: "",
-            lastName: "",
-            email: "",
-            phone: "",
+            username: user?.username || "",
+            firstName: user?.firstName || "",
+            lastName: user?.lastName || "",
+            email: user?.email || "",
+            phone: user?.phone || "",
             password: undefined,
             rePassword: undefined,
         }
     });
+
+    useEffect(() => {
+        if(isProfile && isEdit) {
+        form.reset({
+            username: user?.username || "",
+            firstName: user?.firstName || "",
+            lastName: user?.lastName || "",
+            email: user?.email || "",
+            phone: "+2"+user?.phone || "",
+        });
+    }
+    }, [user, isProfile, isEdit,form]);
+
 
     // Mutation hook to delete account
     const deleteMutation = useDeleteMe();
@@ -226,7 +242,7 @@ export function FormComponent({ isProfile, isEdit }: { isProfile?: boolean; isEd
                                         defaultCountry="EG"
                                         international
                                         countryCallingCodeEditable={false}
-                                        className={`w-full rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 
+                                        className={`w-full rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2
                                              ${form.formState.errors.phone
                                                 ? "border-red-500 focus:border-red-500 focus:ring-red-500"
                                                 : ""

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { geistMono } from "@/lib/fonts";
-import { Providers } from "./providers";
+import { Providers } from "../components/providers/providers";
 
 /**
  * Load Inter font from Google with Latin subset

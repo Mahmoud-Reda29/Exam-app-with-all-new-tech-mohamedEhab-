@@ -10,14 +10,14 @@
 "use server";
 
 import { getAccessToken } from "@/lib/utils/auth.util";
-import { AnswerPayload } from "@/types/exams";
+import { AnswerPayload } from "@/lib/types/exams";
 
 export const checkAnswersAction = async (payload: AnswerPayload) => {
   const token = await getAccessToken();
   console.log(token);
 
   const res = await fetch(
-    `${process.env.NEXT_PUBLIC_API_BASE}/questions/check`,
+    `${process.env.API}/questions/check`,
     {
       method: "POST",
       headers: {

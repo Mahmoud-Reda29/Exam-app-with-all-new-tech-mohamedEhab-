@@ -20,9 +20,10 @@ import { LoginInput, loginSchema } from "@/lib/schemes/auth.schema";
 import { useLogin } from "../_hooks/use-login";
 
 export function LoginForm() {
+  //Navigation
   const router = useRouter();
 
-  // Initialize React Hook Form with Zod schema validation
+  // Form & Schema
   const form = useForm<LoginInput>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
@@ -31,13 +32,13 @@ export function LoginForm() {
     },
   });
 
-  // React Query mutation hook for login API
+  // Hooks
   const loginMutation = useLogin();
 
-  // State to toggle password visibility
+  // States
   const [showPassword, setShowPassword] = useState(false);
 
-  // Handle form submit
+  // Functions
   const onSubmit = (data: LoginInput) => {
     loginMutation.mutate(data, {
       onSuccess: () => {

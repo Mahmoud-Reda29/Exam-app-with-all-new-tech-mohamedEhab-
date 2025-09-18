@@ -36,7 +36,6 @@ export function ChangePasswordForm() {
   const onSubmit = (data: ChangePasswordInput) => {
     changePasswordMutation.mutate(data, {
       onSuccess: () => {
-        form.reset();
         toast.success("Password changed successfully. Please login again.");
         signOut({ callbackUrl: "/login" });
       },

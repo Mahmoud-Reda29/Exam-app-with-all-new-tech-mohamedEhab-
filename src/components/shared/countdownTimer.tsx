@@ -4,58 +4,51 @@ import { useCountdownStore } from "@/store/useCountdownStore";
 import { useEffect, useRef } from "react";
 import { CircularProgressbar, buildStyles } from "react-circular-progressbar";
 import "react-circular-progressbar/dist/styles.css";
+import { Button } from "../ui/button";
+import { useForgotPassword } from "@/app/(auth)/forgot-password/_hooks/use-forgot-password";
 
 type CountdownProgressProps = {
   totalMinutes?: number;
+  email?: string;
 };
 
-/**
- * CountdownTimer Component
- * -------------------------
- * Displays a countdown timer with a circular progress bar.
- * - If `totalMinutes` is provided, shows a circular countdown with minutes and seconds.
- * - If `totalMinutes` is not provided, shows a simple text countdown in seconds.
- * - Uses a global Zustand store (`useCountdownStore`) for managing timeLeft, tick, and startCountdown.
- * - Automatically starts countdown and updates every second.
- * - Clears the interval when unmounted or countdown reaches zero.
- */
-const CountdownTimer = ({ totalMinutes }: CountdownProgressProps) => {
+const CountdownTimer = ({ totalMinutes, email }: CountdownProgressProps) => {
   const timeLeft = useCountdownStore((s) => s.timeLeft);
   const startCountdown = useCountdownStore((s) => s.startCountdown);
   const tick = useCountdownStore((s) => s.tick);
+  const { mutate: forgotPassword, error, isPending } = useForgotPassword();
 
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
-    // Start countdown if totalMinutes is defined
     if (typeof totalMinutes === "number" && totalMinutes > 0) {
       startCountdown(totalMinutes * 60);
     }
+  }, [totalMinutes, startCountdown]);
 
-    // Set interval to update time every second
-    intervalRef.current = setInterval(() => {
-      const currentTime = useCountdownStore.getState().timeLeft;
-      if (currentTime <= 0) {
-        // Stop interval if countdown reaches zero
-        if (intervalRef.current) {
-          clearInterval(intervalRef.current);
-          intervalRef.current = null;
-        }
-      } else {
-        tick(); // Decrease timeLeft by one
-      }
-    }, 1000);
+  useEffect(() => {
+    // clear old interval
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
+    }
 
-    // Cleanup on unmount
+    // only set new interval if timeLeft > 0
+    if (timeLeft > 0) {
+      intervalRef.current = setInterval(() => {
+        tick();
+      }, 1000);
+    }
+
+    // cleanup
     return () => {
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
         intervalRef.current = null;
       }
     };
-  }, []);
+  }, [timeLeft, tick]);
 
-  // Render circular progress if totalMinutes is provided
   if (typeof totalMinutes === "number" && totalMinutes > 0) {
     const totalSeconds = totalMinutes * 60;
     const percentage = Math.max(
@@ -84,11 +77,29 @@ const CountdownTimer = ({ totalMinutes }: CountdownProgressProps) => {
     );
   }
 
-  // Render simple text countdown if totalMinutes is not provided
   return (
-    <p className="text-center font-mono font-medium text-[14px] text-gray-600">
-      You can request another code in: {timeLeft}s
-    </p>
+    <>
+      {timeLeft > 0 ? (
+        <p className="text-center font-mono font-medium text-[14px] text-gray-600">
+          You can request another code in: {timeLeft}s
+        </p>
+      ) : (
+        <div className="flex items-center justify-center gap-2">
+          <p>Didn’t receive the code? </p>
+          <Button
+            onClick={() => {
+              forgotPassword(email ?? "");
+              startCountdown(60);
+            }}
+            variant="link"
+            className="underline border-none p-0 hover:bg-transparent text-primary cursor-pointer"
+          >
+            {isPending ? "Resending..." : "Resend"}
+          </Button>
+          {error && <p className="text-red-500">{error.message}</p>}
+        </div>
+      )}
+    </>
   );
 };
 

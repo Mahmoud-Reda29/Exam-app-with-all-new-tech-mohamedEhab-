@@ -20,9 +20,8 @@ export const registerSchema = z
         email: z.email("Invalid email").nonempty("Email is required"),
         password: z
             .string()
-            .min(6, "Password must be at least 6 chars")
-            .optional(),
-        rePassword: z.string().optional(),
+            .min(6, "Password must be at least 6 chars"),
+        rePassword: z.string(),
         phone: z
             .string()
             .nonempty("Phone is required")
@@ -48,10 +47,24 @@ export const verifyCodeSchema = z.object({
 });
 export type VerifyCodeInput = z.infer<typeof verifyCodeSchema>;
 
-export const resetPasswordSchema = z.object({
-    email: loginSchema.shape.email,
-    newPassword: loginSchema.shape.password,
-});
+export const resetPasswordSchema = z
+  .object({
+    email: z
+      .string()
+      .email("Invalid email")
+      .nonempty("Email is required"),
+    newPassword: z
+      .string()
+      .regex(
+        /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$/,
+        "Password must be at least 8 characters, include uppercase, lowercase, number, and special character"
+      ),
+    confirmNewPassword: z.string(),
+  })
+  .refine((data) => data.newPassword === data.confirmNewPassword, {
+    message: "Passwords do not match",
+    path: ["confirmNewPassword"],
+  });
 export type ResetPasswordInput = z.infer<typeof resetPasswordSchema>;
 
 
@@ -90,6 +103,6 @@ export const userSchema = z
             path: ["rePassword"],
         }
     );
-    
+
 
 export type UserInput = z.infer<typeof userSchema>;

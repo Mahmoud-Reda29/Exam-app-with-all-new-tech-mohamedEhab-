@@ -5,7 +5,7 @@ import InfiniteScroll from "react-infinite-scroll-component";
 import { Card, CardContent } from "@/components/ui/card";
 import Image from "next/image";
 import { ChevronDown } from "lucide-react";
-import { Subject, SubjectsResponse } from "@/types/subject";
+import { Subject, SubjectsResponse } from "@/lib/types/subject";
 import Link from "next/link";
 
 // Component to display subjects with infinite scrolling

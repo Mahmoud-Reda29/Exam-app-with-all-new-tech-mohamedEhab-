@@ -1,5 +1,5 @@
 import { useMutation } from "@tanstack/react-query";
-import { deleteAccount } from "../_actions/profile";
+import { deleteAccount } from "../_actions/profile.action";
 
 /**
  * useDeleteMe Hook

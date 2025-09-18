@@ -1,5 +1,5 @@
 import { getAccessToken } from "@/lib/utils/auth.util";
-import { SubjectsResponse } from "@/types/subject";
+import { SubjectsResponse } from "@/lib/types/subject";
 
 
 export async function fetchSubjects(): Promise<SubjectsResponse> {
